@@ -1,0 +1,236 @@
+﻿@model PruebaTecnicaCoppel.Models.MovesEmployee;
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Edit MoveEmployee";
+}
+<link rel="stylesheet" href="~/css/MovesEmployeeCreate.css" type="text/css" />
+
+@using (Html.BeginForm())
+{
+    <div class="container">
+        @if (TempData["Error"] != null)
+        {
+            <p class="alert alert-danger" id="errorMessage">@TempData["Error"]</p>
+        }
+        @Html.AntiForgeryToken()
+        
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <div style="display:none">
+                @Html.LabelFor(Model => Model.EmployeeId, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(Model => Model.EmployeeId, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <label for="DdlEmployees">Choose Employee</label>
+                    <select id="DdlEmployees" class="form-control">
+                        <option selected disabled>Choose Employee...</option>
+                    </select>
+                </div>
+                <div class="col-lg-4">
+                    <label for="NameEmployee">Employee's name</label>
+                    <input id="NameEmployee" type="text" disabled class="form-control" />
+                </div>
+                <div class="col-lg-4">
+                    <label for="EmployeeRole">Employee's role</label>
+                    <input id="EmployeeRole" type="text" disabled class="form-control" />
+                </div>
+            </div>
+
+            @Html.LabelFor(Model => Model.DateMove, new { @class = "control-label col-md-2" })
+            <div class="row">
+                <div class="col-lg-4">
+                    @Html.EditorFor(Model => Model.DateMove,new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    <label for="cbDriver">Driver</label>
+                    <input type="radio" id="cbDriver" name="occupations" value="1" onchange="changeOccupation()">
+                    <label for="cbDriver">Charger</label>
+                    <input type="radio" id="cbCharger" name="occupations" value="2" onchange="changeOccupation()">
+                    <label for="cbDriver">Assistant</label>
+                    <input type="radio" id="cbAssistant" name="occupations" value="3" onchange="changeOccupation()">
+                </div>
+            </div>
+        
+            @Html.LabelFor(Model => Model.Deliver, new { @class = "control-label col-md-2" })
+            <div class="row">
+                <div class="col-lg-4">
+                    @Html.EditorFor(Model => Model.Deliver, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+        
+            <div style="display:none">
+                @Html.EditorFor(Model => Model.Role, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" class="btn btn-success" value="Update!"/>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+}
+<br />
+<br />
+<br />
+<div style="border: 4px dotted; border-color: red;">
+    <p style="color:red">WARNING! This button delete the register</p>
+    <button class="btn btn-danger" onclick="deleteRegister()">DELETE!</button>
+
+</div>
+<script>
+    /*
+        NOTA: Lo ideal es llevar el javascript a otro archivo, para efectos practicos lo deje aqui pero para llevarlo a otro archivo
+        click derecho crear nuevo elemento-> js file-> le pones el mismo nombre del html al que correspondera el js
+    */
+    var ListaEmpleados;
+    var Move;
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        GetEmployees();
+        GetDataFromMove();
+        
+    }, false);
+
+    //PETICION QUE OBTIENE LOS EMPLEADOS
+    function GetEmployees() {
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                ListaEmpleados = JSON.parse(this.responseText);
+                setEmployeesToSelect();
+               
+            }
+        });
+
+
+        xhr.open("POST", window.location.origin.toString() + "/MovesEmployee/GetEmployeesAvailable");
+        xhr.send();
+    }
+    //PETICION QUE LLEVA A UN METODO EN EL CONTROLADOR EL CUAL TRAE EL REGISTRO COMO TAL DEL MOVIMIENTO EL CUAL SE SELECCIONO EN LA PANTALLA ANTERIOR
+    function GetDataFromMove(){
+        var IdMove = '@Html.Raw(ViewBag.IdMoveEmployee)';
+        if(IdMove==""){
+            IdMove=GetURLParameter(window.location.href);
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                Move = JSON.parse(this.responseText); 
+                setAllFieldsToRegister();
+            }
+        });
+
+
+        xhr.open("POST", window.location.origin.toString() + "/MovesEmployee/GetDataFromMoveById?IdMove=" + IdMove);
+        xhr.send();
+    }
+    //PONER LOS EMPLEADOS EN EL DROP DOWN
+    function setEmployeesToSelect() {
+        for (Empleado of ListaEmpleados) {
+            const sel = document.getElementById("DdlEmployees");
+            var opt = document.createElement("option");
+            opt.value = Empleado.id;
+            opt.text = "[" + Empleado.employeeNumber + "] " + Empleado.name;
+            sel.append(opt);
+        }
+    }
+    //CUANDO SE INGRESA A LA PAGINA CARGA TODOS LOS CAMPOS CON LOS DATOS QUE TIENE EL REGISTRO DEL CUAL SE VIENE
+    function setAllFieldsToRegister(){
+        $('#DdlEmployees').val(Move.employeeId).prop('selected', true);
+        document.getElementById("EmployeeId").value = Move.employeeId;
+        
+        document.getElementById("NameEmployee").value = Move.name;
+        UpdateChecksAndTextBox(Move.role);
+        $('#Deliver').val(Move.deliver);
+        $('#DateMove').val(Move.dateMoveSTR);
+
+    }
+    //CUANDO SE CAMBIA EL DROP DOWN DE EMPLEADO SE CAMBIARA LAS CAJAS DE TEXTO PARA VER SU ID Y SU NUMERO DE EMPLEADO
+    document.getElementById('DdlEmployees').addEventListener('change', function () {
+        for (Empleado of ListaEmpleados) {
+            if (Empleado.id == this.value) {
+                
+                document.getElementById("EmployeeId").value = Empleado.id;
+                document.getElementById("NameEmployee").value = Empleado.name;
+                UpdateChecksAndTextBox(Move.role);
+
+                break;
+            }
+        }
+    });
+    //FUNCION PARA EL ONCHANGE DE LOS RADIOBUTTON
+    function changeOccupation() {
+        var radioButtons = document.getElementsByName("occupations");
+        radioButtons.forEach(function (button) {
+            if (button.checked) {
+                document.getElementById("Role").value = button.value;
+                UpdateChecksAndTextBox(button.value);
+            }
+        });
+    }
+    /*
+        UTILIZADO PARA ACTUALIZAR LOS RADIO BUTTONS Y A SU VEZ LO ESOS CHECKS MODIFICAN UNAS CAJAS DE TEXTO PARA INDICAR QUE SE ESTA CAMBIANDO EL ROL
+        Y TIENE EL PROPOSITO DE REUTILIZARSE PARA EVITAR COPIAR Y PEGAR ESTAS LINEAS DE CODIGO EN OTRAS FUNCIONES
+    */
+    function UpdateChecksAndTextBox(value){
+        if (value == 1) {
+            document.getElementById("EmployeeRole").value = "Driver";
+            document.getElementById("cbDriver").checked = true;
+            document.getElementById("Role").value = 1;
+        } else if (value == 2) {
+            document.getElementById("EmployeeRole").value = "Charger";
+            document.getElementById("cbCharger").checked = true;
+            document.getElementById("Role").value = 2;
+        } else {
+            document.getElementById("EmployeeRole").value = "Assistant";
+            document.getElementById("cbAssistant").checked = true;
+            document.getElementById("Role").value = 3;
+        }
+    }
+    //ESTA FUNCION SIRVE POR SI SE PIERDE EL VIEWBAG OBTENER EL PARAMETRO DE LA URL
+    function GetURLParameter(sParam) {
+        var sPageURL = sParam;
+
+        //var sPageURL = window.location.href;
+        var indexOfLastSlash = sPageURL.lastIndexOf("/");
+
+        if (indexOfLastSlash > 0 && sPageURL.length - 1 != indexOfLastSlash)
+            return sPageURL.substring(indexOfLastSlash + 1);
+        else
+            return 0;
+    }
+
+    //ESTA FUNCION ELIMINAR UN REGISTRO (le cambia el estatus a 0 en realidad)
+    function deleteRegister(){
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                var response= JSON.parse(this.responseText);
+                if (parseInt(response.responseCode) == 1) {
+                    window.location.href = window.location.origin.toString() + "/MovesEmployee";
+                }
+            }
+        });
+
+        var IdMove = GetURLParameter(window.location.href);
+        xhr.open("POST", window.location.origin.toString() + "/MovesEmployee/DeleteMoveEmployee?IdMove=" + IdMove);
+        xhr.send();
+
+    }
+</script>

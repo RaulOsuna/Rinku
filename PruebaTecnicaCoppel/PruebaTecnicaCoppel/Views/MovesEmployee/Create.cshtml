@@ -1,0 +1,127 @@
+﻿@model PruebaTecnicaCoppel.Models.MovesEmployee;
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Create MoveEmployee";
+}
+<link rel="stylesheet" href="~/css/MovesEmployeeCreate.css" type="text/css" />
+@using (Html.BeginForm())
+{
+    <div class="container">
+        @if (TempData["Error"] != null)
+        {
+            <p class="alert alert-danger" id="errorMessage">@TempData["Error"]</p>
+        }
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <div style="display:none">
+                @Html.LabelFor(Model => Model.EmployeeId, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(Model => Model.EmployeeId, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    <label for="DdlEmployees">Choose Employee</label>
+                    <select id="DdlEmployees" class="form-control">
+                        <option selected disabled>Choose Employee...</option>
+                    </select>
+                </div>
+                <div class="col-lg-4">
+                    <label for="NameEmployee">Employee's name</label>
+                    <input id="NameEmployee" type="text" disabled class="form-control" />
+                </div>
+                <div class="col-lg-4">
+                    <label for="EmployeeRole">Employee's role</label>
+                    <input id="EmployeeRole" type="text" disabled class="form-control"/>
+                </div>
+            </div>
+            @Html.LabelFor(Model => Model.DateMove, new { @class = "control-label col-md-2" })
+        
+            <div class="row">
+                <div class="col-lg-4">
+                    @Html.EditorFor(Model => Model.DateMove,new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+        
+
+            @Html.LabelFor(Model => Model.Deliver, new { @class = "control-label col-md-2" })
+            <div class="row">
+                <div class="col-lg-4">
+                    @Html.EditorFor(Model => Model.Deliver, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+             <div style="display:none">
+                 @Html.EditorFor(Model => Model.Role, new { htmlAttributes = new { @class = "form-control" } })
+             </div>
+        
+        
+        
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" class="btn btn-success" value="Create!" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script>
+    /*
+        NOTA: Lo ideal es llevar el javascript a otro archivo, para efectos practicos lo deje aqui pero para llevarlo a otro archivo
+        click derecho crear nuevo elemento-> js file-> le pones el mismo nombre del html al que correspondera el js
+    */
+    var ListaEmpleados;
+    document.addEventListener('DOMContentLoaded', function () {
+        GetEmployees();
+    }, false);
+    //OBTIENE LOS EMPLEADOS
+    function GetEmployees(){
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                ListaEmpleados = JSON.parse(this.responseText);
+                setEmployeesToSelect();
+            }
+        });
+        
+        
+        xhr.open("POST", window.location.origin.toString() + "/MovesEmployee/GetEmployeesAvailable");
+        xhr.send();
+    }
+    //PONE LOS EMPLEADOS EN EL DROP DOWN
+    function setEmployeesToSelect(){
+        for (Empleado of ListaEmpleados) {
+            const sel = document.getElementById("DdlEmployees");
+            var opt = document.createElement("option");
+            opt.value=Empleado.id;
+            opt.text ="["+ Empleado.employeeNumber + "] " + Empleado.name;
+            sel.append(opt);
+        }
+    }
+    //ONCHENAGE PARA EL DROP DOWN DE LOS EMPLEADOS
+    document.getElementById('DdlEmployees').addEventListener('change', function () {
+        for (Empleado of ListaEmpleados) {
+            if(Empleado.id==this.value){
+                
+                document.getElementById("EmployeeId").value = Empleado.id;
+                document.getElementById("NameEmployee").value = Empleado.name;
+                if(Empleado.role==1){
+                    document.getElementById("EmployeeRole").value = "Driver";
+                    document.getElementById("Role").value = 1;
+                } else if (Empleado.role == 2) {
+                    document.getElementById("EmployeeRole").value = "Charger";
+                    document.getElementById("Role").value = 2;
+                }else{
+                    document.getElementById("EmployeeRole").value = "Assistant";
+                    document.getElementById("Role").value = 3;
+                }
+                
+                break;
+            }
+        }
+    });
+</script>

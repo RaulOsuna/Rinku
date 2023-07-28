@@ -1,0 +1,178 @@
+﻿@model PruebaTecnicaCoppel.Models.Employee;
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Edit Employee";
+
+}
+<link rel="stylesheet" href="~/css/MovesEmployeeCreate.css" type="text/css" />
+@using (Html.BeginForm())
+{
+     <div class="container">
+
+     
+        @if (TempData["Error"] != null)
+        {
+            <p class="alert alert-danger" id="errorMessage">@TempData["Error"]</p>
+        }
+        @Html.AntiForgeryToken()
+        
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <div style="display:none">
+                @Html.LabelFor(Model => Model.Id, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(Model => Model.Id, new{htmlAttributes  = new{@id="IdEmployee",@class = "form-control"}})
+                    @Html.ValidationMessageFor(Model => Model.Id,"",new {@class ="form-control"})
+                </div>
+
+            </div>
+        
+            @Html.LabelFor(Model => Model.Name, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(Model => Model.Name, new{ htmlAttributes  = new{@id="nameEmployee",@class = "form-control"}})
+            </div>
+
+            @Html.LabelFor(Model => Model.EmployeeNumber, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(Model => Model.EmployeeNumber, new{ htmlAttributes  = new{@id="employeeNumber",@class = "form-control"}})
+            </div>
+
+        
+            <div class="col-md-10">
+                <ul>
+                    <li>
+                        <label for="cbDriver">Driver</label>
+                        <input type="radio" id="cbDriver" name="occupations" value="1" onchange="changeOccupation()">
+                    </li>
+                    <li>
+                        <label for="cbDriver">Charger</label>
+                        <input type="radio" id="cbCharger" name="occupations" value="2" onchange="changeOccupation()">
+                    </li>
+                    <li>
+                        <label for="cbDriver">Assistant</label>
+                        <input type="radio" id="cbAssistant" name="occupations" value="3" onchange="changeOccupation()">
+                    </li>
+                </ul>
+
+            </div>
+            <div style="display:none">
+                @Html.EditorFor(Model => Model.role, new{htmlAttributes  = new{@id="Role",@class = "form-control"}})
+
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" class="btn btn-success" value="Update!" />
+                </div>
+            </div>
+            <br />
+            <br />
+            <br />
+            
+        </div>
+    </div>
+}
+<div style="border: 4px dotted; border-color: red;">
+    <p style="color:red">WARNING! This button delete the register</p>
+    <button class="btn btn-danger" onclick="deleteRegister()">DELETE!</button>
+
+</div>
+<script>
+    /*
+        NOTA: Lo ideal es llevar el javascript a otro archivo, para efectos practicos lo deje aqui pero para llevarlo a otro archivo
+        click derecho crear nuevo elemento-> js file-> le pones el mismo nombre del html al que correspondera el js
+    */
+   var Employee;
+    document.addEventListener('DOMContentLoaded', function () {
+        GetEmployeeById();
+        
+        
+    }, false);
+
+    //OBTIENE EL EMPLEADO POR ID
+    function GetEmployeeById(){
+        var data = "";
+        var IdEmployee = GetURLParameter(window.location.href);
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+               Employee = JSON.parse(this.responseText);
+                setValueToInputs();
+            }
+        });
+
+        xhr.open("POST", window.location.origin.toString() + "/Employee/GetEmployeeById?Id=" + IdEmployee);
+
+        xhr.send(data);
+
+    }
+    //SE ACTIVA CON ONCHANGE CUANDO SE PRESIONA UN RADIO BUTTON
+    function changeOccupation() {
+        var radioButtons = document.getElementsByName("occupations");
+        radioButtons.forEach(function (button) {
+            if (button.checked) {
+                document.getElementById("Role").value = button.value;
+            }
+        });
+    }
+    //SE ASIGNA LOS VALORES A LAS CAJAS DE TEXTO DEL FORM
+    function setValueToInputs() {
+        
+        document.getElementById("IdEmployee").value = Employee.id;
+        document.getElementById("nameEmployee").value = Employee.name;
+        document.getElementById("employeeNumber").value = Employee.employeeNumber;
+        setCheckBoxFromRegister();
+    }
+    //ES PARA ASIGNAR VALOR A LOS RADIO BUTTON
+    function setCheckBoxFromRegister(){
+        
+        var role = parseInt(Employee.role);
+        if (role == 1) {
+            document.getElementById("cbDriver").checked = true;
+            document.getElementById("Role").value = 1;
+        } else if (role == 2) {
+            document.getElementById("cbCharger").checked = true;
+            document.getElementById("Role").value = 2;
+        } else {
+            document.getElementById("cbAssistant").checked = true;
+            document.getElementById("Role").value = 3;
+        }
+
+    }
+    //ESTA FUNCION SIRVE POR SI SE PIERDE EL VIEWBAG OBTENER EL PARAMETRO DE LA URL
+    function GetURLParameter(sParam) {
+        var sPageURL = sParam;
+
+        //var sPageURL = window.location.href;
+        var indexOfLastSlash = sPageURL.lastIndexOf("/");
+
+        if (indexOfLastSlash > 0 && sPageURL.length - 1 != indexOfLastSlash)
+            return sPageURL.substring(indexOfLastSlash + 1);
+        else
+            return 0;
+    }
+
+    //ESTA FUNCION ELIMINAR UN REGISTRO (le cambia el estatus a 0 en realidad)
+    function deleteRegister() {
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                var response = JSON.parse(this.responseText);
+                if (parseInt(response.responseCode) == 1) {
+                    window.location.href = window.location.origin.toString() + "/Employee";
+                }
+            }
+        });
+
+        var IdEmployee = GetURLParameter(window.location.href);
+        xhr.open("POST", window.location.origin.toString() + "/Employee/DeleteEmployee?IdEmployee=" + IdEmployee);
+        xhr.send();
+
+    }
+</script>

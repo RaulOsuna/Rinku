@@ -1,0 +1,207 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "MoveEmployee";
+}
+<link rel="stylesheet" href="~/css/MovesEmployeeCreate.css" type="text/css" />
+
+<div style="text-align:right">
+    <button class="btn btn-primary" onclick="GetMovesEmployeeAvailablesALL()">
+        <i class="fa fa-refresh" aria-hidden="true"></i>
+        Get all data
+    </button>
+    <button class="btn btn-primary" onclick="location.href='@Url.Action("Create","MovesEmployee")'">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        New Move
+    </button>
+</div>
+
+<br/>
+<br />
+<br />
+<div class="row">
+    <div class="col-lg-3">
+        <select id="DdlEmployees" class="form-control">
+            <option selected disabled>Choose Employee...</option>
+        </select>
+    </div>
+    <div class="col-lg-3">
+        <select id="DdlMonth" class="form-control">
+            <option selected disabled value="0">Choose Month...</option>
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">Octuber</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+    </div>
+    <div class="col-lg-3">
+        <input type="number" id="txtYear" placeholder="insert a year" class="form-control" />
+    </div>
+    <div class="col-lg-3">
+        <button onclick="ObtenerCalculo()" class="btn btn-success">
+            <i class="fa fa-search" aria-hidden="true"></i>
+            Search Data
+        </button>
+    </div>
+</div>
+
+
+
+
+<table id="TBLmoveEmployees" class="display nowrap" style="width:100%">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Date</th>
+            <th>Salary Base</th>
+            <th>Salary PerMonth</th>
+            <th>Voucher Bonus</th>
+            <th>Salary PerMonth with voucherbonus</th>
+            <th>Deliver qty</th>
+            <th>Deliver Bonus</th>
+            <th>Hour Bonus</th>
+            <th>ISR</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="tbodyTBLmoveEmployees">
+
+    </tbody>
+</table>
+
+<script>
+    /*
+        NOTA: Lo ideal es llevar el javascript a otro archivo, para efectos practicos lo deje aqui pero para llevarlo a otro archivo
+        click derecho crear nuevo elemento-> js file-> le pones el mismo nombre del html al que correspondera el js
+    */
+    var ListaEmpleados;
+   
+    document.addEventListener('DOMContentLoaded', function () {
+
+        $("#TBLmoveEmployees").DataTable();
+        GetEmployees();
+        GetMovesEmployeeAvailablesALL();
+    }, false);
+
+    //OBTIENE TODOS LOS MOVIMIENTOS DE LOS EMPLEADOS
+    function GetMovesEmployeeAvailablesALL(){
+        var data = "";
+
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                var ListaMovimientos = JSON.parse(this.responseText);
+                setDatatable(ListaMovimientos);
+            }
+        });
+
+        xhr.open("POST", window.location.origin.toString() + "/MovesEmployee/GetMovesEmployeeAvailablesALL");
+
+        xhr.send(data);
+
+    }
+    //OBTIENE EL CALCULO DE UN EMPLEADO PASANDO SU ID Y EL MES, ANIO CORRESPONDIENTE
+    function ObtenerCalculo() {
+        var Data={
+            IdEmployee: document.getElementById("DdlEmployees").value,
+            Month: document.getElementById("DdlMonth").value,
+            Year: document.getElementById("txtYear").value
+        }
+        
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                var ListaMovimientos= JSON.parse(this.responseText);
+                setDatatable(ListaMovimientos);
+                
+            }
+        });
+
+
+        xhr.open("POST", window.location.origin.toString() + "/MovesEmployee/GetMoveEmployeeCalculatesByDateAndIdEmployee?Id=" +Data.IdEmployee+"&Month=" + Data.Month+"&Year=" + Data.Year);
+        xhr.send();
+    }
+    //OBTIENE LOS EMPLEADOS
+    function GetEmployees() {
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                ListaEmpleados = JSON.parse(this.responseText);
+                setEmployeesToSelect();
+            }
+        });
+
+
+        xhr.open("POST", window.location.origin.toString() + "/MovesEmployee/GetEmployeesAvailable");
+        xhr.send();
+    }
+    //PONE LOS EMPLEADOS EN EL DROP DOWN 
+    function setEmployeesToSelect() {
+        for (Empleado of ListaEmpleados) {
+            const sel = document.getElementById("DdlEmployees");
+            var opt = document.createElement("option");
+            opt.value = Empleado.id;
+            opt.text = "[" + Empleado.employeeNumber + "] " + Empleado.name;
+            sel.append(opt);
+        }
+    }
+    //LLEVA A EDITAR UN MOVIMIENTO EN ESPECIFICO
+    function BTNEditMove(IdMove){
+        window.location.href="/MovesEmployee/Edit/"+IdMove;
+    }
+    //LLENA LA TABLA EN BASE A UNA LISTA EN ESTE CASO LISTA DE MOVES
+    function setDatatable(listData){
+        $('#TBLmoveEmployees').dataTable().fnClearTable();
+        $('#TBLmoveEmployees').dataTable().fnDestroy();
+                                                                     
+        for (data of listData) {
+            let DateRegister = new Date(data.dateMove);
+            var salaryPerMonthWOvoucher = data.salaryPerMonth - data.voucherBonus;
+            const options = { style: 'currency', currency: 'MXN' };
+            const numberFormat = new Intl.NumberFormat('es-MX', options);
+            var rolSTR;
+            if(data.role==1){
+                rolSTR="Driver";
+            } else if (data.role == 2) {
+                rolSTR = "Charger";
+            }else{
+                rolSTR = "Assistant";
+            }
+            var tr="<tr>";
+            tr += "<td>"+data.name+"</td>";
+            tr += "<td>" + rolSTR + "</td>";
+            tr += "<td>" + data.dateMoveSTR + "</td>";
+            tr += "<td>" +  numberFormat.format(data.salaryBase) + "</td>";
+            tr += "<td>" + numberFormat.format(salaryPerMonthWOvoucher) + "</td>";
+            tr += "<td>" + numberFormat.format(data.voucherBonus) + "</td>";
+            tr += "<td>" + numberFormat.format(data.salaryPerMonth) + "</td>";
+            tr += "<td>" + data.deliver + "</td>";
+            tr += "<td>" + numberFormat.format(data.deliverBonus) + "</td>";
+            tr += "<td>" + numberFormat.format(data.hourBonus) + "</td>";
+            tr += "<td>" + data.isr + "%</td>";
+            tr += "<td>" + numberFormat.format(data.total) + "</td>";
+            tr += "<td><button class='btn btn-warning'><i class='fa fa-pencil' aria-hidden='true' onclick='BTNEditMove(" + data.idMove + ")'></i></button></td>";
+            tr+="</tr>";
+            $("#tbodyTBLmoveEmployees").append(tr);
+        }
+        $("#TBLmoveEmployees").DataTable();
+    }
+</script>
+

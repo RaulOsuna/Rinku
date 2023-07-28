@@ -1,0 +1,71 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Employee";
+
+}
+<link rel="stylesheet" href="~/css/MovesEmployeeCreate.css" type="text/css" />
+<div style="text-align:right">
+    <button class="btn btn-primary" onclick="location.href='@Url.Action("Create","Employee")'"><i class="fa fa-plus" aria-hidden="true"></i>New Employee</button>
+</div>
+<br/>
+<br />
+<br />
+<table id="TBLemployees" class="display nowrap" style="width:100%">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Number Employee</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="tbodyTBLemployees">
+    </tbody>
+</table>
+
+
+<script>
+    /*
+        NOTA: Lo ideal es llevar el javascript a otro archivo, para efectos practicos lo deje aqui pero para llevarlo a otro archivo
+        click derecho crear nuevo elemento-> js file-> le pones el mismo nombre del html al que correspondera el js
+    */
+
+    var ListaEmpleados;
+    document.addEventListener('DOMContentLoaded', function () {
+        ListaEmpleados = JSON.parse('@Html.Raw(ViewBag.ListaEmpleados)'); // EN EL CONTROLADOR SE PASO EL DATO LISTAEMPLEADOS POR VIEWBAG, CONTIENE UN JSON PERO STRING Y PASA A SER OBJETO JSON
+        $("#TBLemployees").DataTable(); //SE INICIALIZA EL DATATABLE
+        setDatatable(ListaEmpleados); //FUNCION PARA LLENADO DE DATATABLE, SE MANDA LA LISTA DE EMPLEADOS YA COMO OBJETO
+    }, false);
+
+    function setDatatable(listData) {
+        $('#TBLemployees').dataTable().fnClearTable(); //SE LIMPIA LA TABLA
+        $('#TBLemployees').dataTable().fnDestroy(); //SE ELIMINA LA TABLA
+         //CICLO PARA RECORRER LA LISTA DE EMPLEADOS Y SE AGREGAN AL DATATABLE
+        for (data of listData) {
+            let DateRegister = new Date(data.dateMove);
+            var tr = "<tr>";
+            tr += "<td>" + data.Name + "</td>";
+            tr += "<td>" + data.EmployeeNumber + "</td>";
+            if(data.role==1){
+                tr += "<td>Driver</td>";
+            } else if (data.role == 2) {
+                tr += "<td>Charger</td>";
+            }else{
+                tr += "<td>Assistant</td>";
+            }
+            
+            tr += "<td><button class='btn btn-warning'><i class='fa fa-pencil' aria-hidden='true' onclick='BTNEditEmployee(" + data.Id + ")'></i></button></td>";
+            tr += "</tr>";
+            $("#tbodyTBLemployees").append(tr);
+        }
+        //SE INICIALIZA NUEVAMENTE EL DATATABLE
+        $("#TBLemployees").DataTable();
+    }
+
+    //BOTON QUE TE LLEVA A EDITAR EMPLEADO CON SU RESPECTIVO ID PARA SABER CUAL SE EDITARA
+    function BTNEditEmployee(idEmployee) {
+        window.location.href="/Employee/Edit/"+idEmployee;
+    }
+</script>
