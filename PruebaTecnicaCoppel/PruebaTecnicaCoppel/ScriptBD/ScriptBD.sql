@@ -253,7 +253,7 @@ BEGIN
 	)
 	INSERT INTO #tmpResult(IdMove,Name,Role,DateMove,SalaryBase,SalaryPerMonth,Deliver,DeliverBonus, HourBonus) 
 	SELECT ME.Id,E.Name,ME.Role,ME.DateMove,30.00,(((30.00*8)*7)*4) 'SalaryPerMonth',ME.Deliver, ME.Deliver*5.00 'DeliverBonus',
-		CASE WHEN ME.Role=1 THEN ((10*8)*6) WHEN ME.Role=2 THEN ((5*8)*6) ELSE 0 END 'HourBonus'
+		CASE WHEN ME.Role=1 THEN ((8*6)*4)*10 WHEN ME.Role=2 THEN ((8*6)*4)*5 ELSE 0 END 'HourBonus'
 	FROM MoveEmployees ME(NOLOCK)
 	INNER JOIN Employees E(NOLOCK) ON E.Id=ME.IdEmployee
 	WHERE E.Status=1 AND E.Id=@IdEmployee AND DATEPART(MONTH,ME.DateMove)=@Month AND DATEPART(YEAR,ME.DateMove)=@Year AND ME.Status=1; 
@@ -295,7 +295,7 @@ BEGIN
 	)
 	INSERT INTO #tmpResult(IdMove,Name,Role,DateMove,SalaryBase,SalaryPerMonth,Deliver,DeliverBonus, HourBonus) 
 	SELECT ME.Id,E.Name,ME.Role,ME.DateMove,30.00,(((30.00*8)*7)*4) 'SalaryPerMonth',ME.Deliver, ME.Deliver*5.00 'DeliverBonus',
-		CASE WHEN ME.Role=1 THEN ((10*8)*6) WHEN ME.Role=2 THEN ((5*8)*6) ELSE 0 END 'HourBonus'
+		CASE WHEN ME.Role=1 THEN ((8*6)*4)*10 WHEN ME.Role=2 THEN ((8*6)*4)*5 ELSE 0 END 'HourBonus'
 	FROM MoveEmployees ME(NOLOCK)
 	INNER JOIN Employees E(NOLOCK) ON E.Id=ME.IdEmployee
 	WHERE E.Status=1 AND ME.Status=1; 
