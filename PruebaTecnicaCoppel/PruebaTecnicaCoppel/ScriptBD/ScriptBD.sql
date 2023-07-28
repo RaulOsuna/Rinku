@@ -77,7 +77,7 @@ CREATE PROCEDURE GetEmployeeById
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
 -- Description:Consulty to obtain employee by Id
--- EXECUTION: 
+-- EXECUTION: GetEmployeeById 1
 -- =============================================
 
 AS
@@ -98,7 +98,7 @@ CREATE PROCEDURE GetEmployeeByNumberEmployee
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
 -- Description:Consulty to obtain employee by number employee
--- EXECUTION: 
+-- EXECUTION: GetEmployeeByNumberEmployee 123
 -- =============================================
 
 AS
@@ -117,12 +117,12 @@ CREATE PROCEDURE UpdateEmployeeByNumberEmployee
 @NumberEmployee BIGINT,
 @Name VARCHAR(50),
 @Role INT,
-@Status INT
+@Status BIT
 -- =============================================
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
--- Description:Consulty to Register a employee using Number Employee
--- EXECUTION: 
+-- Description:Consulty to update employee by number employee
+-- EXECUTION: UpdateEmployeeByNumberEmployee 1, 'Raul', 1, 1
 -- =============================================
 
 AS
@@ -198,7 +198,7 @@ CREATE PROCEDURE SaveMoveEmployee
 -- =============================================
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
--- Description:Consulty to register employees
+-- Description:Consulty to save move employees
 -- EXECUTION: SaveMoveEmployee 1, '2023-07-01', 1,4
 -- =============================================
 
@@ -228,7 +228,7 @@ CREATE PROCEDURE GetMovesEmployeeAvailablesByIdEmployee
 -- =============================================
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
--- Description:Consulty to register employees
+-- Description:Consulty to obtain all moves employees by id employee
 -- EXECUTION: GetMovesEmployeeAvailablesByIdEmployee 1,7,2023
 -- =============================================
 @IdEmployee BIGINT,
@@ -273,7 +273,7 @@ CREATE PROCEDURE GetMovesEmployeeAvailablesALL
 -- =============================================
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
--- Description:Consulty to register employees
+-- Description:Consulty to obtain all employees move
 -- EXECUTION: GetMovesEmployeeAvailablesALL 
 -- =============================================
 AS
@@ -315,7 +315,7 @@ CREATE PROCEDURE GetMoveEmployeeById
 -- =============================================
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
--- Description:Consulty to register employees
+-- Description:Consulty to obtain employees by id
 -- EXECUTION: GetMoveEmployeeById 1
 -- =============================================
 AS
@@ -341,7 +341,7 @@ CREATE PROCEDURE UpdateMoveEmployeeById
 -- =============================================
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
--- Description:Consulty to register employees
+-- Description:Consulty to update move employees by id
 -- EXECUTION: UpdateMoveEmployeeById 1
 -- =============================================
 AS
@@ -374,7 +374,7 @@ CREATE PROCEDURE DeleteEmployeeById
 -- =============================================
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
--- Description:Consulty to Update a employee using Id
+-- Description:Consulty to change status to an employee using Id
 -- EXECUTION: DeleteEmployeeById 1
 -- =============================================
 
@@ -394,7 +394,7 @@ CREATE PROCEDURE DeleteMovesEmployeeById
 -- =============================================
 -- Author:  Raul Adrian Osuna Davizon
 -- Create date: 26/07/2023
--- Description:Consulty to Update a employee using Id
+-- Description:Consulty to change move Employee by Id
 -- EXECUTION: DeleteMovesEmployeeById 1
 -- =============================================
 
